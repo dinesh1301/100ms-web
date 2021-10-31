@@ -16,6 +16,7 @@ export const LeaveRoom = () => {
   const history = useHistory();
   const params = useParams();
   const [showEndRoomModal, setShowEndRoomModal] = useState(false);
+  const [showLeaveCall, setShowLeaveCall] = useState(false);
   const [lockRoom, setLockRoom] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const permissions = useHMSStore(selectPermissions);
@@ -44,7 +45,8 @@ export const LeaveRoom = () => {
           if (permissions?.endRoom) {
             setShowMenu(value);
           } else {
-            leaveRoom();
+            // leaveRoom();
+            setShowLeaveCall(true);
           }
         }}
         menuOpen={showMenu}
@@ -152,6 +154,48 @@ export const LeaveRoom = () => {
               variant="danger"
               onClick={() => {
                 hmsActions.endRoom(lockRoom, "End Room");
+                leaveRoom();
+              }}
+            >
+              End Room
+            </Button>
+          </div>
+        }
+      />
+      <MessageModal
+        show={showLeaveCall}
+        onClose={() => {
+          setShowLeaveCall(false);
+          setLockRoom(false);
+        }}
+        title="Leave Video Call"
+        body="Are you sure, you want to leave the video call?"
+        footer={
+          <div className="flex">
+            {/* <div className="flex items-center">
+              <label className="text-base dark:text-white text-gray-100">
+                <input
+                  type="checkbox"
+                  className="mr-1"
+                  onChange={() => setLockRoom(prev => !prev)}
+                  checked={lockRoom}
+                />
+                <span>Lock room</span>
+              </label>
+            </div> */}
+            <Button
+              classes={{ root: "mr-3 ml-3" }}
+              onClick={() => {
+                setShowLeaveCall(false);
+                setLockRoom(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => {
+                // hmsActions.endRoom(lockRoom, "End Room");
                 leaveRoom();
               }}
             >
