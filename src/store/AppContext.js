@@ -38,7 +38,12 @@ const defaultTokenEndpoint = process.env
       process.env.REACT_APP_TOKEN_GENERATION_ENDPOINT_DOMAIN
     }/`
   : process.env.REACT_APP_TOKEN_GENERATION_ENDPOINT;
-
+console.log(
+  "defaultTokenEndpoint",
+  defaultTokenEndpoint,
+  process.env.REACT_APP_TOKEN_GENERATION_ENDPOINT_DOMAIN,
+  process.env.REACT_APP_TOKEN_GENERATION_ENDPOINT
+);
 const envPolicyConfig = JSON.parse(process.env.REACT_APP_POLICY_CONFIG || "{}");
 const envAudioPlaylist = JSON.parse(
   process.env.REACT_APP_AUDIO_PLAYLIST || "[]"
