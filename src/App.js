@@ -21,7 +21,6 @@ import {
 } from "./services/tokenService";
 import { hmsToast } from "./views/components/notifications/hms-toast";
 import { Notifications } from "./views/components/notifications/Notifications";
-
 const defaultTokenEndpoint = process.env
   .REACT_APP_TOKEN_GENERATION_ENDPOINT_DOMAIN
   ? `${getBackendEndpoint()}${
@@ -50,6 +49,7 @@ export function EdtechComponent({
   getUserToken = defaultGetUserToken,
   policyConfig = envPolicyConfig,
 }) {
+ 
   const { 0: width, 1: height } = aspectRatio
     .split("-")
     .map(el => parseInt(el));

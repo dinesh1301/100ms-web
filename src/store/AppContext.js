@@ -80,12 +80,13 @@ const AppContextProvider = ({
   const localPeer = useHMSStore(selectLocalPeer);
   const roleNames = useHMSStore(selectAvailableRoleNames);
   const rolesMap = useHMSStore(selectRolesMap);
+
   const appPolicyConfig = useMemo(
     () => normalizeAppPolicyConfig(roleNames, rolesMap, policyConfig),
     [roleNames, policyConfig, rolesMap]
   );
   initialLoginInfo.roomId = roomId;
-
+  // initialLoginInfo.username = username || "Anonymous User";
   const [state, setState] = useState({
     loginInfo: initialLoginInfo,
     maxTileCount: uiSettingsFromStorage.maxTileCount,

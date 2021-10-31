@@ -13,10 +13,13 @@ import {
   useHMSStore,
 } from "@100mslive/hms-video-react";
 import FullPageProgress from "../views/components/FullPageSpinner";
+import { useQuery } from "../hooks";
 
 export const Conference = () => {
   const history = useHistory();
   const { roomId, role } = useParams();
+  const query = useQuery();
+  const username = query.get("username");
   const context = useContext(AppContext);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isParticipantListOpen, setIsParticipantListOpen] = useState(false);
@@ -31,7 +34,13 @@ export const Conference = () => {
     setIsParticipantListOpen(value);
   }, []);
 
-  const { loginInfo } = context;
+  const { loginInfo, setLoginInfo } = context;
+
+  // useEffect(() => {
+  //   if (username) {
+  //     setLoginInfo({ username });
+  //   }
+  // }, [username]);
 
   useEffect(() => {
     if (!roomId) {
@@ -40,15 +49,25 @@ export const Conference = () => {
     if (!loginInfo.token) {
       // redirect to join if token not present
       if (role)
-        history.push(`/preview/${loginInfo.roomId || roomId || ""}/${role}`);
-      else history.push(`/preview/${loginInfo.roomId || roomId || ""}`);
+        history.push(
+          `/preview/${loginInfo.roomId || roomId || ""}/${role}?username=${
+            username || "anonymous"
+          }`
+        );
+      else
+        history.push(
+          `/preview/${loginInfo.roomId || roomId || ""}?username=${
+            username || "anonymous"
+          }`
+        );
     }
+
     return () => {
       // This is needed to handle mac touchpad swipe gesture
       hmsActions.leave();
     };
     // eslint-disable-next-line
-  }, []);
+  }, [username]);
 
   if (!isConnectedToRoom) {
     return <FullPageProgress />;
