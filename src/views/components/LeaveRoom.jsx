@@ -23,6 +23,7 @@ export const LeaveRoom = () => {
 
   const leaveRoom = () => {
     hmsActions.leave();
+    // Get redirect url here
     if (params.role) {
       history.push("/leave/" + params.roomId + "/" + params.role);
     } else {
