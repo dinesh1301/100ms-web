@@ -53,18 +53,20 @@ const envVideoPlaylist = JSON.parse(
 );
 
 const defaultUiSettings = {
-  maxTileCount: 9,
+  maxTileCount: 4,
   subscribedNotifications: {
-    PEER_JOINED: false,
-    PEER_LEFT: false,
-    NEW_MESSAGE: false,
+    PEER_JOINED: true,
+    PEER_LEFT: true,
+    NEW_MESSAGE: true,
     ERROR: true,
   },
 };
 
-const uiSettingsFromStorage = localStorage.getItem(UI_SETTINGS_KEY)
-  ? JSON.parse(localStorage.getItem(UI_SETTINGS_KEY))
-  : defaultUiSettings;
+// const uiSettingsFromStorage = localStorage.getItem(UI_SETTINGS_KEY)
+//   ? JSON.parse(localStorage.getItem(UI_SETTINGS_KEY))
+//   : defaultUiSettings;
+
+const uiSettingsFromStorage = defaultUiSettings;
 
 const AppContextProvider = ({
   roomId = "",

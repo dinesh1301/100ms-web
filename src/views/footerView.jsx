@@ -276,11 +276,11 @@ export const ConferenceFooter = ({ isChatOpen, toggleChat }) => {
           isPublishing && (
             <span key="SettingsLeftSpace" className="mx-2 md:mx-3"></span>
           ),
-          isPublishing && <VerticalDivider key="SettingsDivider" />,
+          // isPublishing && <VerticalDivider key="SettingsDivider" />,
           isPublishing && (
             <span key="SettingsRightSpace" className="mx-2 md:mx-3"></span>
           ),
-          <MoreSettings key="MoreSettings" />,
+          // <MoreSettings key="MoreSettings" />,
         ]}
         rightComponents={[<LeaveRoom key="leaveRoom" />]}
         backgroundButtonOnClick={handleVirtualBackground}
