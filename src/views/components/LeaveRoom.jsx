@@ -11,6 +11,7 @@ import {
   useHMSStore,
 } from "@100mslive/hms-video-react";
 import { useHistory, useParams } from "react-router-dom";
+import { get } from "../../ApiRequests";
 
 export const LeaveRoom = () => {
   const history = useHistory();
@@ -21,20 +22,53 @@ export const LeaveRoom = () => {
   const [showMenu, setShowMenu] = useState(false);
   const permissions = useHMSStore(selectPermissions);
   const hmsActions = useHMSActions();
+  const [redirectStarted, setRedirectedStarted] = useState(false);
 
   const leaveRoom = () => {
     hmsActions.leave();
+    setRedirectedStarted(true);
+    get(
+      "end-call-screen-url",
+      {
+        room_id: params.roomId,
+      },
+      { viaOauth: false }
+    )
+      .then(response => {
+        console.log("response from redirect", response);
+        setRedirectedStarted(false);
+        // history.push(`${response.data.endcall_url}`);
+        window.location = `${response.data.endcall_url}`;
+      })
+      .catch(err => {
+        console.error("Couldn't end the call properly", err);
+        setRedirectedStarted(false);
+      });
     // Get redirect url here
-    if (params.role) {
-      history.push("/leave/" + params.roomId + "/" + params.role);
-    } else {
-      history.push("/leave/" + params.roomId);
-    }
+    // if (params.role) {
+    //   history.push("/leave/" + params.roomId + "/" + params.role);
+    // } else {
+    //   history.push("/leave/" + params.roomId);
+    // }
   };
 
   return (
     <Fragment>
-      <ContextMenu
+      <Button
+        size="md"
+        shape="rectangle"
+        variant="danger"
+        iconOnly={isMobileDevice()}
+        active={isMobileDevice()}
+        key="LeaveRoom"
+        onClick={() => {
+          setShowLeaveCall(true);
+        }}
+      >
+        <HangUpIcon className={isMobileDevice() ? "" : "mr-2"} key="hangUp" />
+        {isMobileDevice() ? "" : "Leave room"}
+      </Button>
+      {/* <ContextMenu
         classes={{
           trigger: "w-auto h-auto",
           root: "static",
@@ -42,30 +76,18 @@ export const LeaveRoom = () => {
           menuItem: "hover:bg-transparent-0 dark:hover:bg-transparent-0",
         }}
         onTrigger={value => {
-          if (permissions?.endRoom) {
-            setShowMenu(value);
-          } else {
-            // leaveRoom();
-            setShowLeaveCall(true);
-          }
+          // if (permissions?.endRoom) {
+          //   setShowMenu(value);
+          // } else {
+          // leaveRoom();
+          console.log("onlcick Value", value);
+          setShowLeaveCall(true);
+          // }
         }}
-        menuOpen={showMenu}
+        menuOpen={false}
         key="LeaveAction"
         trigger={
-          <Button
-            size="md"
-            shape="rectangle"
-            variant="danger"
-            iconOnly={isMobileDevice()}
-            active={isMobileDevice()}
-            key="LeaveRoom"
-          >
-            <HangUpIcon
-              className={isMobileDevice() ? "" : "mr-2"}
-              key="hangUp"
-            />
-            {isMobileDevice() ? "" : "Leave room"}
-          </Button>
+         
         }
         menuProps={{
           anchorOrigin: {
@@ -77,8 +99,8 @@ export const LeaveRoom = () => {
             horizontal: "center",
           },
         }}
-      >
-        {permissions?.endRoom && (
+      > */}
+      {/* {permissions?.endRoom && (
           <ContextMenuItem
             label="End Room"
             key="endRoom"
@@ -98,28 +120,16 @@ export const LeaveRoom = () => {
               End Room for all
             </Button>
           </ContextMenuItem>
-        )}
-        <ContextMenuItem
+        )}}
+        {/* <ContextMenuItem
           label="Leave Room"
           key="leaveRoom"
           classes={{
             menuTitleContainer: "hidden",
             menuItemChildren: "my-1 w-full overflow-hidden",
           }}
-        >
-          <Button
-            shape="rectangle"
-            variant="danger"
-            classes={{ root: "w-full" }}
-            onClick={() => {
-              leaveRoom();
-            }}
-          >
-            Just Leave
-          </Button>
-        </ContextMenuItem>
-      </ContextMenu>
-      ,
+        > */}
+
       <MessageModal
         show={showEndRoomModal}
         onClose={() => {
@@ -184,6 +194,7 @@ export const LeaveRoom = () => {
               </label>
             </div> */}
             <Button
+              disabled={redirectStarted}
               classes={{ root: "mr-3 ml-3" }}
               onClick={() => {
                 setShowLeaveCall(false);
@@ -193,13 +204,14 @@ export const LeaveRoom = () => {
               Cancel
             </Button>
             <Button
+              disabled={redirectStarted}
               variant="danger"
               onClick={() => {
                 // hmsActions.endRoom(lockRoom, "End Room");
                 leaveRoom();
               }}
             >
-              End Room
+              Leave Room
             </Button>
           </div>
         }

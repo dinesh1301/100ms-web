@@ -1,6 +1,13 @@
 import axios from "axios";
-import { getTimezone, getToken } from "utils";
-const BASE_URL = process.env.REACT_TOPMATE_DOMAIN_URL;
+// import { getTimezone, getToken } from "utils";
+
+/***
+ *
+ * All token related variables have been commented.
+ * If you wish to use authorization pls uncomment the inclusion of ViaAuth
+ */
+const BASE_URL = process.env.REACT_APP_TOPMATE_DOMAIN_URL;
+console.log("BASE_URL", BASE_URL);
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   headers: {
@@ -13,14 +20,14 @@ const getConfig = (params, extraConfigs) => {
     params: params,
   };
 
-  const token = getToken();
+  // const token = getToken();
 
-  if (extraConfigs && extraConfigs.viaOauth) {
-    config = {
-      ...config,
-      headers: { Authorization: `Token ${extraConfigs?.token || token}` },
-    };
-  }
+  // if (extraConfigs && extraConfigs.viaOauth) {
+  //   config = {
+  //     ...config,
+  //     headers: { Authorization: `Token ${extraConfigs?.token || token}` },
+  //   };
+  // }
   if (extraConfigs && extraConfigs.withCredentials) {
     config = {
       ...config,
