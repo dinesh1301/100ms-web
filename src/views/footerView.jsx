@@ -161,28 +161,28 @@ export const ConferenceFooter = ({ isChatOpen, toggleChat }) => {
     //creating VB button for only web
     createVBPlugin();
     createNoiseSuppresionPlugin();
-    if (isAllowedToPublish.screen) {
-      leftComponents.push(
-        <Button
-          key="shareAudio"
-          iconOnly
-          variant="no-fill"
-          iconSize="md"
-          shape="rectangle"
-          active={isAudioScreenshare}
-          onClick={() => {
-            if (isAudioScreenshare) {
-              toggleScreenShare(false, true);
-            } else {
-              setShareAudioModal(true);
-            }
-          }}
-        >
-          <MusicIcon />
-        </Button>,
-        <VerticalDivider key="audioShareDivider" />
-      );
-    }
+    // if (isAllowedToPublish.screen) {
+    //   leftComponents.push(
+    //     <Button
+    //       key="shareAudio"
+    //       iconOnly
+    //       variant="no-fill"
+    //       iconSize="md"
+    //       shape="rectangle"
+    //       active={isAudioScreenshare}
+    //       onClick={() => {
+    //         if (isAudioScreenshare) {
+    //           toggleScreenShare(false, true);
+    //         } else {
+    //           setShareAudioModal(true);
+    //         }
+    //       }}
+    //     >
+    //       <MusicIcon />
+    //     </Button>,
+    //     <VerticalDivider key="audioShareDivider" />
+    //   );
+    // }
     leftComponents.push(
       <Button
         key="chat"
@@ -196,16 +196,17 @@ export const ConferenceFooter = ({ isChatOpen, toggleChat }) => {
         {countUnreadMessages === 0 ? <ChatIcon /> : <ChatUnreadIcon />}
       </Button>
     );
-    isAllowedToPublish.screen &&
-      leftComponents.push(<AudioPlaylist key="audioPlaylist" />);
-    isAllowedToPublish.screen &&
-      leftComponents.push(
-        <VideoPlaylist
-          key="videoPlaylist"
-          trigger={<VideoPlaylistIcon key="videoPlaylistIcon" />}
-          active={activeVideoPlaylist}
-        />
-      );
+
+    // isAllowedToPublish.screen &&
+    //   leftComponents.push(<AudioPlaylist key="audioPlaylist" />);
+    // isAllowedToPublish.screen &&
+    //   leftComponents.push(
+    //     <VideoPlaylist
+    //       key="videoPlaylist"
+    //       trigger={<VideoPlaylistIcon key="videoPlaylistIcon" />}
+    //       active={activeVideoPlaylist}
+    //     />
+    //   );
   }
   if (isMobileDevice()) {
     leftComponents.push(
@@ -260,26 +261,26 @@ export const ConferenceFooter = ({ isChatOpen, toggleChat }) => {
               <VirtualBackgroundIcon />
             </Button>
           ) : null,
-          isAllowedToPublish.audio && audiopluginRef.current?.isSupported() ? (
-            <Button
-              iconOnly
-              variant="no-fill"
-              shape="rectangle"
-              active={isNoiseSuppression}
-              onClick={handleNoiseSuppression}
-              key="noiseSuppression"
-            >
-              <NoiseSupressionIcon />
-            </Button>
-          ) : null,
+          // isAllowedToPublish.audio && audiopluginRef.current?.isSupported() ? (
+          //   <Button
+          //     iconOnly
+          //     variant="no-fill"
+          //     shape="rectangle"
+          //     active={isNoiseSuppression}
+          //     onClick={handleNoiseSuppression}
+          //     key="noiseSuppression"
+          //   >
+          //     <NoiseSupressionIcon />
+          //   </Button>
+          // ) : null,
           isPublishing && (
             <span key="SettingsLeftSpace" className="mx-2 md:mx-3"></span>
           ),
-          isPublishing && <VerticalDivider key="SettingsDivider" />,
+          // isPublishing && <VerticalDivider key="SettingsDivider" />,
           isPublishing && (
             <span key="SettingsRightSpace" className="mx-2 md:mx-3"></span>
           ),
-          <MoreSettings key="MoreSettings" />,
+          // <MoreSettings key="MoreSettings" />,
         ]}
         rightComponents={[<LeaveRoom key="leaveRoom" />]}
         backgroundButtonOnClick={handleVirtualBackground}

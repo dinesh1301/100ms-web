@@ -38,7 +38,12 @@ const defaultTokenEndpoint = process.env
       process.env.REACT_APP_TOKEN_GENERATION_ENDPOINT_DOMAIN
     }/`
   : process.env.REACT_APP_TOKEN_GENERATION_ENDPOINT;
-
+console.log(
+  "defaultTokenEndpoint",
+  defaultTokenEndpoint,
+  process.env.REACT_APP_TOKEN_GENERATION_ENDPOINT_DOMAIN,
+  process.env.REACT_APP_TOKEN_GENERATION_ENDPOINT
+);
 const envPolicyConfig = JSON.parse(process.env.REACT_APP_POLICY_CONFIG || "{}");
 const envAudioPlaylist = JSON.parse(
   process.env.REACT_APP_AUDIO_PLAYLIST || "[]"
@@ -48,18 +53,20 @@ const envVideoPlaylist = JSON.parse(
 );
 
 const defaultUiSettings = {
-  maxTileCount: 9,
+  maxTileCount: 4,
   subscribedNotifications: {
-    PEER_JOINED: false,
-    PEER_LEFT: false,
-    NEW_MESSAGE: false,
+    PEER_JOINED: true,
+    PEER_LEFT: true,
+    NEW_MESSAGE: true,
     ERROR: true,
   },
 };
 
-const uiSettingsFromStorage = localStorage.getItem(UI_SETTINGS_KEY)
-  ? JSON.parse(localStorage.getItem(UI_SETTINGS_KEY))
-  : defaultUiSettings;
+// const uiSettingsFromStorage = localStorage.getItem(UI_SETTINGS_KEY)
+//   ? JSON.parse(localStorage.getItem(UI_SETTINGS_KEY))
+//   : defaultUiSettings;
+
+const uiSettingsFromStorage = defaultUiSettings;
 
 const AppContextProvider = ({
   roomId = "",
@@ -73,12 +80,13 @@ const AppContextProvider = ({
   const localPeer = useHMSStore(selectLocalPeer);
   const roleNames = useHMSStore(selectAvailableRoleNames);
   const rolesMap = useHMSStore(selectRolesMap);
+
   const appPolicyConfig = useMemo(
     () => normalizeAppPolicyConfig(roleNames, rolesMap, policyConfig),
     [roleNames, policyConfig, rolesMap]
   );
   initialLoginInfo.roomId = roomId;
-
+  // initialLoginInfo.username = username || "Anonymous User";
   const [state, setState] = useState({
     loginInfo: initialLoginInfo,
     maxTileCount: uiSettingsFromStorage.maxTileCount,
