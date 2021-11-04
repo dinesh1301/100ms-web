@@ -7,7 +7,7 @@ import axios from "axios";
  * If you wish to use authorization pls uncomment the inclusion of ViaAuth
  */
 const BASE_URL = process.env.REACT_APP_TOPMATE_DOMAIN_URL;
-console.log("BASE_URL", BASE_URL);
+
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   headers: {
