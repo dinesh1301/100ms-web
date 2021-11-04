@@ -31,6 +31,7 @@ export const LeaveRoom = () => {
       "end-call-screen-url",
       {
         room_id: params.roomId,
+        user_type: params.role || undefined,
       },
       { viaOauth: false }
     )
