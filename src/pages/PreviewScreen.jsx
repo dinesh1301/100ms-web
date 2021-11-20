@@ -11,7 +11,6 @@ import { AppContext } from "../store/AppContext";
 import getToken from "../services/tokenService";
 import { convertLoginInfoToJoinConfig } from "../store/appContextUtils";
 import { USERNAME_KEY } from "../common/constants";
-import { useQuery } from "../hooks";
 
 const PreviewScreen = ({ getUserToken }) => {
   const history = useHistory();
@@ -29,9 +28,6 @@ const PreviewScreen = ({ getUserToken }) => {
   const skipPreview = urlSearchParams.get("token") === "beam_recording";
 
   const usernameFromStorage = localStorage.getItem(USERNAME_KEY);
-
-  const query = useQuery();
-  const username = query.get("username");
 
   useEffect(() => {
     if (skipPreview) {
@@ -84,18 +80,10 @@ const PreviewScreen = ({ getUserToken }) => {
             audioMuted,
             videoMuted,
             roomId: urlRoomId,
-            username: username || "anonymous",
+            username: name,
           });
-          if (userRole)
-            history.push(
-              `/meeting/${urlRoomId}/${userRole}?username=${
-                username || "anonymous"
-              }`
-            );
-          else
-            history.push(
-              `/meeting/${urlRoomId}?username=${username || "anonymous"}`
-            );
+          if (userRole) history.push(`/meeting/${urlRoomId}/${userRole}`);
+          else history.push(`/meeting/${urlRoomId}`);
         })
         .catch(error => {
           console.log("Token API Error", error);
@@ -117,16 +105,8 @@ const PreviewScreen = ({ getUserToken }) => {
             username: name,
           });
           // send to meeting room now
-          if (userRole)
-            history.push(
-              `/meeting/${urlRoomId}/${userRole}?username=${
-                username || "anonymous"
-              }`
-            );
-          else
-            history.push(
-              `/meeting/${urlRoomId}?username=${username || "anonymous"}`
-            );
+          if (userRole) history.push(`/meeting/${urlRoomId}/${userRole}`);
+          else history.push(`/meeting/${urlRoomId}`);
         })
         .catch(error => {
           console.log("Token API Error", error);
@@ -190,13 +170,8 @@ const PreviewScreen = ({ getUserToken }) => {
               roomId: urlRoomId,
               token,
               env: loginInfo.env,
-              username: username || "anonymous",
+              username: usernameFromStorage,
             })}
-            classes={{
-              helloDiv: "display-none",
-              nameDiv: "display-none",
-              inputRoot: "display-none",
-            }}
           />
         ) : (
           <ProgressIcon width="100" height="100" />
