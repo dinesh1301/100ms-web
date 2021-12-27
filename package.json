@@ -25,7 +25,7 @@
     "worker-timers": "^7.0.40"
   },
   "scripts": {
-    "start": "craco start",
+    "start": "craco  --openssl-legacy-provider start",
     "build": "craco build --profile",
     "test": "craco test",
     "eject": "react-scripts eject",
