@@ -3,10 +3,7 @@ import {
   useHMSStore,
   ControlBar,
   AudioPlaylist,
-  VirtualBackgroundIcon,
-  NoiseSupressionIcon,
   Button,
-  ShareScreenIcon,
   ChatIcon,
   ChatUnreadIcon,
   MusicIcon,
@@ -32,6 +29,19 @@ import { getRandomVirtualBackground } from "../common/utils";
 import { MoreSettings } from "./components/MoreSettings";
 import { AudioVideoToggle } from "./components/AudioVideoToggle";
 import { LeaveRoom } from "./components/LeaveRoom";
+import { useMetadata } from "./hooks/useMetadata";
+import { IconButton, Tooltip } from "@100mslive/react-ui";
+import {
+  HandIcon,
+  AudioLevelIcon,
+  VirtualBackgroundIcon,
+  ShareScreenIcon,
+} from "@100mslive/react-icons";
+import {
+  browserSupportsTranscription,
+  TranscriptionButton,
+} from "./components/Transcription";
+import { FeatureFlags } from "../store/FeatureFlags";
 
 export const ConferenceFooter = ({ isChatOpen, toggleChat }) => {
   const isScreenShared = useHMSStore(selectIsLocalScreenShared);
@@ -49,7 +59,7 @@ export const ConferenceFooter = ({ isChatOpen, toggleChat }) => {
   const isAllowedToPublish = useHMSStore(selectIsAllowedToPublish);
   const activeVideoPlaylist = useHMSStore(selectVideoPlaylist.selection).id;
   const [shareAudioModal, setShareAudioModal] = useState(false);
-
+  const { isHandRaised, setIsHandRaised } = useMetadata();
   const isNoiseSuppression = useHMSStore(
     selectIsLocalAudioPluginPresent("@100mslive/hms-noise-suppression")
   );
@@ -84,16 +94,17 @@ export const ConferenceFooter = ({ isChatOpen, toggleChat }) => {
 
   function createVBPlugin() {
     if (!pluginRef.current) {
-      pluginRef.current = new HMSVirtualBackgroundPlugin("none");
+      pluginRef.current = new HMSVirtualBackgroundPlugin("none", true);
     }
   }
 
   async function startPlugin() {
     //create plugin if not present
     createVBPlugin();
-    await pluginRef.current.setBackground(getRandomVirtualBackground());
-    //Running VB on every alternate frame rate for optimized cpu usage
+    window.HMS.virtualBackground = pluginRef.current;
     try {
+      await pluginRef.current.setBackground(getRandomVirtualBackground());
+      //Running VB on every alternate frame rate for optimized cpu usage
       await hmsActions.addPluginToVideoTrack(pluginRef.current, 15);
     } catch (err) {
       console.error("add virtual background plugin failed", err);
@@ -222,6 +233,15 @@ export const ConferenceFooter = ({ isChatOpen, toggleChat }) => {
         {countUnreadMessages === 0 ? <ChatIcon /> : <ChatUnreadIcon />}
       </Button>
     );
+    leftComponents.push(
+      <IconButton
+        key="raise-hand"
+        onClick={() => setIsHandRaised(!isHandRaised)}
+        active={!isHandRaised}
+      >
+        <HandIcon />
+      </IconButton>
+    );
   }
 
   const isPublishing = isAllowedToPublish.video || isAllowedToPublish.audio;
@@ -231,36 +251,40 @@ export const ConferenceFooter = ({ isChatOpen, toggleChat }) => {
 
   return (
     <>
+      <div id="speechtxt" className="transcribe"></div>
       <ControlBar
         leftComponents={leftComponents}
         centerComponents={[
           <AudioVideoToggle key="audioVideoToggle" />,
           isAllowedToPublish.screen && !isMobileDevice() ? (
-            <Button
-              key="toggleScreenShare"
-              iconOnly
-              variant="no-fill"
-              iconSize="md"
-              shape="rectangle"
-              classes={{ root: "mx-2" }}
-              onClick={() => toggleScreenShare(!isScreenShared)}
+            <Tooltip
+              title={`${!isScreenShared ? "Start" : "Stop"} screen sharing`}
             >
-              <ShareScreenIcon />
-            </Button>
+              <IconButton
+                active={!isScreenShared}
+                key="toggleScreenShare"
+                className="mx-2"
+                onClick={() => toggleScreenShare(!isScreenShared)}
+              >
+                <ShareScreenIcon />
+              </IconButton>
+            </Tooltip>
           ) : null,
           isAllowedToPublish.video && pluginRef.current?.isSupported() ? (
-            <Button
-              iconOnly
-              variant="no-fill"
-              shape="rectangle"
-              active={isVBPresent}
-              onClick={handleVirtualBackground}
-              classes={{ root: "mx-2" }}
-              key="VB"
+            <Tooltip
+              title={`Turn ${!isVBPresent ? "on" : "off"} virtual background`}
             >
-              <VirtualBackgroundIcon />
-            </Button>
+              <IconButton
+                active={!isVBPresent}
+                onClick={handleVirtualBackground}
+                className="mx-2"
+                key="VB"
+              >
+                <VirtualBackgroundIcon />
+              </IconButton>
+            </Tooltip>
           ) : null,
+<<<<<<< HEAD
           // isAllowedToPublish.audio && audiopluginRef.current?.isSupported() ? (
           //   <Button
           //     iconOnly
@@ -273,6 +297,29 @@ export const ConferenceFooter = ({ isChatOpen, toggleChat }) => {
           //     <NoiseSupressionIcon />
           //   </Button>
           // ) : null,
+=======
+          isAllowedToPublish.audio && audiopluginRef.current?.isSupported() ? (
+            <Tooltip
+              title={`Turn ${
+                !isNoiseSuppression ? "on" : "off"
+              } noise suppression`}
+            >
+              <IconButton
+                className="ml-2"
+                active={!isNoiseSuppression}
+                onClick={handleNoiseSuppression}
+                key="noiseSuppression"
+              >
+                <AudioLevelIcon />
+              </IconButton>
+            </Tooltip>
+          ) : null,
+          FeatureFlags.enableTranscription &&
+          browserSupportsTranscription &&
+          isAllowedToPublish.audio ? (
+            <TranscriptionButton />
+          ) : null,
+>>>>>>> 9d920a843ce56da1c6406659dd211d379a9c7147
           isPublishing && (
             <span key="SettingsLeftSpace" className="mx-2 md:mx-3"></span>
           ),

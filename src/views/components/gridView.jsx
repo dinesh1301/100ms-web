@@ -6,14 +6,17 @@ import {
 } from "@100mslive/hms-video-react";
 import { ChatView } from "./chatView";
 import { getBlurClass } from "../../common/utils";
-import eventsImg from "../../images/event-clubhouse.png";
 
 const MAX_TILES_FOR_MOBILE = 4;
 
 /**
- * this is for showing webinar etc. related image if required on certain meeting urls
+ * the below variables are for showing webinar etc. related image if required on certain meeting urls
  */
-const EVENT_ROOM_IDS = ["gummy-viridian-bongo",'crabby-vermilion-akita'];
+const webinarProps = JSON.parse(process.env.REACT_APP_WEBINAR_PROPS || "{}");
+const eventRoomIDs = webinarProps?.ROOM_IDS || [];
+const eventsImg = webinarProps?.IMAGE_FILE || "";  // the image to show in center
+// the link to navigate to when user clicks on the image
+const webinarInfoLink = webinarProps?.LINK_HREF || "https://100ms.live/";
 
 // The center of the screen shows bigger tiles
 export const GridCenterView = ({
@@ -25,11 +28,13 @@ export const GridCenterView = ({
   isParticipantListOpen,
   hideSidePane,
   totalPeers,
+  videoTileProps,
 }) => {
   return (
     <div
-      className={`h-full ${hideSidePane && !isChatOpen ? "w-full" : "w-full md:w-4/5"
-        }`}
+      className={`h-full ${
+        hideSidePane && !isChatOpen ? "w-full" : "w-full md:w-4/5"
+      }`}
     >
       {peers && peers.length > 0 ? (
         <VideoList
@@ -39,12 +44,13 @@ export const GridCenterView = ({
           }}
           maxTileCount={isMobileDevice() ? MAX_TILES_FOR_MOBILE : maxTileCount}
           allowRemoteMute={allowRemoteMute}
+          videoTileProps={videoTileProps}
         />
-      ) : EVENT_ROOM_IDS.some(id => window.location.href.includes(id)) ? (
+      ) : eventRoomIDs.some(id => window.location.href.includes(id)) ? (
         <div className="h-full w-full grid place-items-center p-5">
-          <a href="https://community.100ms.live/developer-community-meetup-october" target="_blank" rel="noreferrer">
+          <a href={webinarInfoLink} target="_blank" rel="noreferrer">
             <img
-              className="w-full rounded-lg shadow-lg"
+              className="w-full rounded-lg shadow-lg p-2"
               alt=""
               src={eventsImg}
             />
@@ -55,7 +61,9 @@ export const GridCenterView = ({
       )}
       {isChatOpen && hideSidePane && (
         <div
-          className={`h-1/2 ${isMobileDevice() ? `w-3/4` : `w-2/10`} absolute z-40 bottom-20 right-0 ${getBlurClass(
+          className={`h-1/2 ${
+            isMobileDevice() ? `w-3/4` : `w-2/10`
+          } absolute z-40 bottom-20 right-0 ${getBlurClass(
             isParticipantListOpen,
             totalPeers
           )}`}
@@ -74,6 +82,7 @@ export const GridSidePaneView = ({
   toggleChat,
   isParticipantListOpen,
   totalPeers,
+  videoTileProps,
 }) => {
   const isMobile = isMobileDevice();
   const rowCount = isMobile ? 1 : undefined;
@@ -91,6 +100,7 @@ export const GridSidePaneView = ({
             maxColCount={2}
             maxRowCount={rowCount}
             compact={true}
+            videoTileProps={videoTileProps}
           />
         )}
       </div>

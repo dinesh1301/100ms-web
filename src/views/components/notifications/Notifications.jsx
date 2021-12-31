@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import { useHistory, useParams } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import {
   useHMSNotifications,
   HMSNotificationTypes,
@@ -8,21 +8,21 @@ import {
   ConnectivityIcon,
   PersonIcon,
   Button,
-  isMobileDevice,
-  useHMSActions,
+  HandIcon,
 } from "@100mslive/hms-video-react";
 import { HMSToastContainer, hmsToast } from "./hms-toast";
 import { TrackUnmuteModal } from "./TrackUnmuteModal";
 import { AutoplayBlockedModal } from "./AutoplayBlockedModal";
 import { AppContext } from "../../../store/AppContext";
 import { TrackMuteAllModal } from "./TrackMuteAllModal";
+import { getMetadata } from "../../../common/utils";
 
 export function Notifications() {
   const notification = useHMSNotifications();
-  const hmsActions = useHMSActions();
   const history = useHistory();
-  const params = useParams();
-  const { subscribedNotifications } = useContext(AppContext);
+  const { subscribedNotifications, loginInfo, HLS_VIEWER_ROLE } =
+    useContext(AppContext);
+  const isHeadless = loginInfo.isHeadlessMode;
   useEffect(() => {
     if (!notification) {
       return;
@@ -52,6 +52,31 @@ export function Notifications() {
           ),
         });
         break;
+      case HMSNotificationTypes.METADATA_UPDATED:
+        // Don't toast message when metadata is updated and raiseHand is false.
+        // Don't toast message in case of local peer.
+        const metadata = getMetadata(notification.data?.metadata);
+        if (!metadata?.isHandRaised || notification.data.isLocal) return;
+
+        console.debug("Metadata updated", notification.data);
+        if (!subscribedNotifications.METADATA_UPDATED) return;
+        hmsToast("", {
+          left: (
+            <Text classes={{ root: "flex" }}>
+              <HandIcon className="mr-2" />
+              {notification.data?.name} raised their hand.
+            </Text>
+          ),
+          autoClose: 2000,
+        });
+        break;
+      case HMSNotificationTypes.NAME_UPDATED:
+        console.log(
+          notification.data.id +
+            " changed their name to " +
+            notification.data.name
+        );
+        break;
       case HMSNotificationTypes.PEER_LEFT:
         console.debug("[Peer Left]", notification.data);
         if (!subscribedNotifications.PEER_LEFT) return;
@@ -65,10 +90,6 @@ export function Notifications() {
         });
         break;
       case HMSNotificationTypes.NEW_MESSAGE:
-        // TODO: remove this when chat UI is fixed for mweb
-        if (isMobileDevice()) {
-          return;
-        }
         if (!subscribedNotifications.NEW_MESSAGE) return;
         hmsToast(`New message from ${notification.data?.senderName}`);
         break;
@@ -97,33 +118,39 @@ export function Notifications() {
                 autoClose: false,
               },
             });
-            setTimeout(() => {
-              history.push("/");
-            }, 2000);
-            return;
+          } else {
+            // show button action when the error is terminal
+            hmsToast("", {
+              center: (
+                <div className="flex">
+                  <Text classes={{ root: "mr-2" }}>
+                    {notification.data?.message ||
+                      "We couldn’t reconnect you. When you’re back online, try joining the room."}
+                  </Text>
+                  <Button
+                    variant="emphasized"
+                    classes={{
+                      root: "self-center mr-2",
+                    }}
+                    onClick={() => {
+                      window.location.reload();
+                    }}
+                  >
+                    Rejoin
+                  </Button>
+                </div>
+              ),
+            });
           }
-          // show button action when the error is terminal
-          hmsToast("", {
-            center: (
-              <div className="flex">
-                <Text classes={{ root: "mr-2" }}>
-                  {notification.data?.message ||
-                    "We couldn’t reconnect you. When you’re back online, try joining the room."}
-                </Text>
-                <Button
-                  variant="emphasized"
-                  classes={{
-                    root: "self-center mr-2",
-                  }}
-                  onClick={() => {
-                    window.location.reload();
-                  }}
-                >
-                  Rejoin
-                </Button>
-              </div>
-            ),
-          });
+          // goto leave for terminal if any action is not performed within 2secs
+          // if network is still unavailable going to preview will throw an error
+          setTimeout(() => {
+            const previewLocation = history.location.pathname.replace(
+              "meeting",
+              "leave"
+            );
+            history.push(previewLocation);
+          }, 2000);
           return;
         }
         if (notification.data?.code === 3008) {
@@ -158,6 +185,9 @@ export function Notifications() {
         });
         break;
       case HMSNotificationTypes.ROLE_UPDATED:
+        if (notification.data.roleName === HLS_VIEWER_ROLE) {
+          return;
+        }
         if (notification.data?.isLocal) {
           hmsToast("", {
             left: <Text>You are now a {notification.data.roleName}.</Text>,
@@ -189,11 +219,11 @@ export function Notifications() {
           ),
         });
         setTimeout(() => {
-          if (params.role) {
-            history.push("/leave/" + params.roomId + "/" + params.role);
-          } else {
-            history.push("/leave/" + params.roomId);
-          }
+          const leaveLocation = history.location.pathname.replace(
+            "meeting",
+            "leave"
+          );
+          history.push(leaveLocation);
         }, 2000);
         break;
       case HMSNotificationTypes.DEVICE_CHANGE_UPDATE:
@@ -204,13 +234,22 @@ export function Notifications() {
       default:
         break;
     }
-  }, [hmsActions, notification]); //eslint-disable-line
+  }, [
+    history,
+    notification,
+    subscribedNotifications.ERROR,
+    subscribedNotifications.NEW_MESSAGE,
+    subscribedNotifications.PEER_JOINED,
+    subscribedNotifications.PEER_LEFT,
+    subscribedNotifications.METADATA_UPDATED,
+    HLS_VIEWER_ROLE,
+  ]);
 
   return (
     <>
       <HMSToastContainer />
       <TrackUnmuteModal notification={notification} />
-      <TrackMuteAllModal notification={notification} />
+      {!isHeadless && <TrackMuteAllModal notification={notification} />}
       <AutoplayBlockedModal notification={notification} />
     </>
   );

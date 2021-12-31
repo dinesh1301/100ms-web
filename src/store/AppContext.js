@@ -6,14 +6,20 @@ import {
   selectAvailableRoleNames,
   selectRolesMap,
 } from "@100mslive/hms-video-react";
-import { FeatureFlags } from "./FeatureFlags";
+import { FeatureFlagsInit } from "./FeatureFlags";
 import {
   convertLoginInfoToJoinConfig,
   normalizeAppPolicyConfig,
   setUpLogRocket,
 } from "./appContextUtils";
 import { getBackendEndpoint } from "../services/tokenService";
-import { UI_SETTINGS_KEY, USERNAME_KEY } from "../common/constants";
+import {
+  UI_SETTINGS_KEY,
+  USERNAME_KEY,
+  DEFAULT_HLS_ROLE_KEY,
+  DEFAULT_HLS_VIEWER_ROLE,
+} from "../common/constants";
+import { getMetadata } from "../common/utils";
 
 const AppContext = React.createContext(null);
 
@@ -30,6 +36,7 @@ const initialLoginInfo = {
   selectedVideoInput: "default",
   selectedAudioInput: "default",
   selectedAudioOutput: "default",
+  isHeadlessMode: false,
 };
 
 const defaultTokenEndpoint = process.env
@@ -59,7 +66,9 @@ const defaultUiSettings = {
     PEER_LEFT: true,
     NEW_MESSAGE: true,
     ERROR: true,
+    METADATA_UPDATED: true,
   },
+  uiViewMode: "grid",
 };
 
 // const uiSettingsFromStorage = localStorage.getItem(UI_SETTINGS_KEY)
@@ -75,6 +84,7 @@ const AppContextProvider = ({
   audioPlaylist = envAudioPlaylist,
   videoPlaylist = envVideoPlaylist,
   children,
+  appDetails,
 }) => {
   const hmsActions = useHMSActions();
   const localPeer = useHMSStore(selectLocalPeer);
@@ -91,7 +101,9 @@ const AppContextProvider = ({
     loginInfo: initialLoginInfo,
     maxTileCount: uiSettingsFromStorage.maxTileCount,
     localAppPolicyConfig: {},
-    subscribedNotifications: uiSettingsFromStorage.subscribedNotifications,
+    subscribedNotifications:
+      uiSettingsFromStorage.subscribedNotifications || {},
+    uiViewMode: uiSettingsFromStorage.uiViewMode || "grid",
   });
 
   useEffect(() => {
@@ -100,9 +112,10 @@ const AppContextProvider = ({
       JSON.stringify({
         maxTileCount: state.maxTileCount,
         subscribedNotifications: state.subscribedNotifications,
+        uiViewMode: state.uiViewMode,
       })
     );
-  }, [state.maxTileCount, state.subscribedNotifications]);
+  }, [state.maxTileCount, state.subscribedNotifications, state.uiViewMode]);
 
   useEffect(() => {
     if (state.loginInfo.username) {
@@ -155,7 +168,7 @@ const AppContextProvider = ({
   const deepSetAppPolicyConfig = config =>
     setState(prevState => ({ ...prevState, localAppPolicyConfig: config }));
 
-  const deepSetSubscribedNotifications = notification => {
+  const deepSetSubscribedNotifications = notification =>
     setState(prevState => ({
       ...prevState,
       subscribedNotifications: {
@@ -163,25 +176,30 @@ const AppContextProvider = ({
         [notification.type]: notification.isSubscribed,
       },
     }));
-  };
-
+  const deepSetuiViewMode = layout =>
+    setState(prevState => ({ ...prevState, uiViewMode: layout }));
   return (
     <AppContext.Provider
       value={{
         setLoginInfo: deepSetLoginInfo,
         setMaxTileCount: deepSetMaxTiles,
         setSubscribedNotifications: deepSetSubscribedNotifications,
+        setuiViewMode: deepSetuiViewMode,
+        uiViewMode: state.uiViewMode,
         loginInfo: state.loginInfo,
         maxTileCount: state.maxTileCount,
         subscribedNotifications: state.subscribedNotifications,
         appPolicyConfig: state.localAppPolicyConfig,
+        HLS_VIEWER_ROLE:
+          getMetadata(appDetails)[DEFAULT_HLS_ROLE_KEY] ||
+          DEFAULT_HLS_VIEWER_ROLE,
         tokenEndpoint,
         audioPlaylist,
         videoPlaylist,
       }}
     >
       {children}
-      <FeatureFlags />
+      <FeatureFlagsInit />
     </AppContext.Provider>
   );
 };

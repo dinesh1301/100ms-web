@@ -16,8 +16,13 @@ import {
   selectRecordingState,
   selectRTMPState,
   selectAudioPlaylist,
+  selectHLSState,
+  selectLocalPeer,
 } from "@100mslive/hms-video-react";
 import PIPComponent from "./PIP/PIPComponent";
+import { AppContext } from "../store/AppContext";
+import { metadataProps as participantInListProps } from "../common/utils";
+import { useContext } from "react";
 
 const SpeakerTag = () => {
   const dominantSpeaker = useHMSStore(selectDominantSpeaker);
@@ -132,20 +137,23 @@ const PlaylistMusic = () => {
   );
 };
 
-const Recording = () => {
+const StreamingRecording = () => {
   const recording = useHMSStore(selectRecordingState);
   const rtmp = useHMSStore(selectRTMPState);
+  const hls = useHMSStore(selectHLSState);
 
   if (
     !recording.browser.running &&
     !recording.server.running &&
+    !hls.running &&
     !rtmp.running
   ) {
     return null;
   }
 
   const isRecordingOn = recording.browser.running || recording.server.running;
-  const getText = () => {
+  const isStreamingOn = hls.running || rtmp.running;
+  const getRecordingText = () => {
     if (!isRecordingOn) {
       return "";
     }
@@ -162,10 +170,16 @@ const Recording = () => {
     return title;
   };
 
+  const getStreamingText = () => {
+    if (isStreamingOn) {
+      return hls.running ? "HLS" : "RTMP";
+    }
+  };
+
   return (
     <div className="flex mx-2">
       {isRecordingOn && (
-        <div className="flex items-center" title={getText()}>
+        <div className="flex items-center" title={getRecordingText()}>
           <RecordingDot
             className="fill-current text-red-600"
             width="20"
@@ -176,8 +190,8 @@ const Recording = () => {
           </Text>
         </div>
       )}
-      {rtmp.running && (
-        <div className="flex items-center mx-2">
+      {isStreamingOn && (
+        <div className="flex items-center mx-2" title={getStreamingText()}>
           <GlobeIcon className="fill-current text-red-600" />
           <Text variant="body" size="md" classes={{ root: "mx-1" }}>
             Streaming
@@ -189,6 +203,8 @@ const Recording = () => {
 };
 
 export const ConferenceHeader = ({ onParticipantListOpen }) => {
+  const { HLS_VIEWER_ROLE } = useContext(AppContext);
+  const localPeer = useHMSStore(selectLocalPeer);
   return (
     <>
       <Header
@@ -196,12 +212,16 @@ export const ConferenceHeader = ({ onParticipantListOpen }) => {
           <LogoButton key={0} />,
           <Music key={1} />,
           <PlaylistMusic key={2} />,
-          <Recording key={3} />,
+          <StreamingRecording key={3} />,
         ]}
         centerComponents={[<SpeakerTag key={0} />]}
         rightComponents={[
-          <PIPComponent key={0} />,
-          <ParticipantList key={1} onToggle={onParticipantListOpen} />,
+          localPeer.roleName !== HLS_VIEWER_ROLE && <PIPComponent key={0} />,
+          <ParticipantList
+            key={1}
+            onToggle={onParticipantListOpen}
+            participantInListProps={participantInListProps}
+          />,
         ]}
         classes={{ root: "h-full" }}
       />

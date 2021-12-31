@@ -23,11 +23,36 @@ const PreviewScreen = ({ getUserToken }) => {
     title: "",
     body: "",
     fatal: false,
+    hideLeave: false,
   });
   const urlSearchParams = new URLSearchParams(location.search);
   const skipPreview = urlSearchParams.get("token") === "beam_recording";
 
   const usernameFromStorage = localStorage.getItem(USERNAME_KEY);
+
+  const tokenErrorBody = errorMessage => (
+    <div>
+      {errorMessage} If you think this is a mistake, please create{" "}
+      <a
+        className="text-blue-standard"
+        target="_blank"
+        href="https://github.com/100mslive/100ms-web/issues"
+        rel="noreferrer"
+      >
+        an issue
+      </a>{" "}
+      or reach out over{" "}
+      <a
+        className="text-blue-standard"
+        target="_blank"
+        href="https://discord.com/invite/kGdmszyzq2"
+        rel="noreferrer"
+      >
+        Discord
+      </a>
+      .
+    </div>
+  );
 
   useEffect(() => {
     if (skipPreview) {
@@ -40,25 +65,53 @@ const PreviewScreen = ({ getUserToken }) => {
           setToken(token);
         })
         .catch(error => {
-          console.error("Token API Error", error);
-          setError({
-            title: "Error fetching token",
-            body: "An error occurred while fetching token. Please look into logs for more details",
-            fatal: true,
-          });
+          if (error.response && error.response.status === 404) {
+            setError({
+              title: "Room does not exist",
+              body: tokenErrorBody(
+                "We could not find the room corresponding to this link."
+              ),
+              fatal: true,
+              hideLeave: true,
+            });
+          } else {
+            console.error("Token API Error", error);
+            setError({
+              title: "Error fetching token",
+              body: "An error occurred while fetching token. Please look into logs for more details",
+              fatal: true,
+            });
+          }
         });
     } else {
-      getToken(tokenEndpoint, loginInfo.env, v4(), userRole, urlRoomId)
+      getToken(tokenEndpoint, v4(), userRole, urlRoomId)
         .then(token => {
           setToken(token);
         })
         .catch(error => {
-          console.error("Token API Error", error);
-          setError({
-            title: "Error fetching token",
-            body: "An error occurred while fetching token. Please look into logs for more details",
-            fatal: true,
-          });
+          if (error.response && error.response.status === 404) {
+            setError({
+              title: "Room does not exist",
+              body: tokenErrorBody(
+                "We could not find the room corresponding to this link."
+              ),
+              fatal: true,
+              hideLeave: true,
+            });
+          } else if (error.response && error.response.status === 403) {
+            setError({
+              title: "Accessing room using this link format is disabled",
+              body: tokenErrorBody(""),
+              fatal: true,
+              hideLeave: true,
+            });
+          } else {
+            setError({
+              title: "Error fetching token",
+              body: "An error occurred while fetching token. Please look into logs for more details",
+              fatal: true,
+            });
+          }
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -81,6 +134,7 @@ const PreviewScreen = ({ getUserToken }) => {
             videoMuted,
             roomId: urlRoomId,
             username: name,
+            isHeadlessMode: skipPreview,
           });
           if (userRole) history.push(`/meeting/${urlRoomId}/${userRole}`);
           else history.push(`/meeting/${urlRoomId}`);
@@ -94,7 +148,7 @@ const PreviewScreen = ({ getUserToken }) => {
           });
         });
     } else {
-      getToken(tokenEndpoint, loginInfo.env, name, userRole, urlRoomId)
+      getToken(tokenEndpoint, name, userRole, urlRoomId)
         .then(token => {
           setLoginInfo({
             token,
@@ -103,6 +157,7 @@ const PreviewScreen = ({ getUserToken }) => {
             role: userRole,
             roomId: urlRoomId,
             username: name,
+            isHeadlessMode: skipPreview,
           });
           // send to meeting room now
           if (userRole) history.push(`/meeting/${urlRoomId}/${userRole}`);
@@ -138,7 +193,11 @@ const PreviewScreen = ({ getUserToken }) => {
   };
 
   const leaveRoom = () => {
-    history.push(`/leave/${urlRoomId}/${userRole}`);
+    if (userRole) {
+      history.push(`/leave/${urlRoomId}/${userRole}`);
+    } else {
+      history.push(`/leave/${urlRoomId}`);
+    }
   };
 
   const clearError = () => {
@@ -151,7 +210,7 @@ const PreviewScreen = ({ getUserToken }) => {
         title={error.title}
         body={error.body}
         onClose={leaveRoom}
-        footer={<Button onClick={leaveRoom}>Leave</Button>}
+        footer={!error.hideLeave && <Button onClick={leaveRoom}>Leave</Button>}
       />
     );
   }
