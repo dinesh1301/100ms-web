@@ -34,17 +34,7 @@ import { arrayIntersection, setFullScreenEnabled } from "../../common/utils";
 import screenfull from "screenfull";
 import { RecordingAndRTMPModal } from "./RecordingAndRTMPModal";
 import { MuteAll } from "./MuteAll";
-<<<<<<< HEAD
-const getDefaultMeetingUrl = () => {
-  const url =
-    window.location.href.replace("meeting", "preview") +
-    "?token=beam_recording";
-  return url.replace("/host", "/view-only");
-};
-const defaultMeetingUrl = getDefaultMeetingUrl();
-=======
 import { ChangeName, StatsForNerds } from "./ChangeName";
->>>>>>> 9d920a843ce56da1c6406659dd211d379a9c7147
 
 export const MoreSettings = () => {
   const {

@@ -24,6 +24,7 @@ import { Notifications } from "./views/components/notifications/Notifications";
 
 import create from "zustand";
 import { HMSRoomProvider as ReactRoomProvider } from "@100mslive/react-sdk";
+import { HMSReactiveStore } from "@100mslive/hms-video-store";
 
 const defaultTokenEndpoint = process.env
   .REACT_APP_TOKEN_GENERATION_ENDPOINT_DOMAIN
@@ -54,7 +55,6 @@ export function EdtechComponent({
   getUserToken = defaultGetUserToken,
   policyConfig = envPolicyConfig,
 }) {
- 
   const hmsReactiveStore = new HMSReactiveStore();
   const errFn = () => {
     throw new Error("modifying store is not allowed");
