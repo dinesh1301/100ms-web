@@ -284,7 +284,6 @@ export const ConferenceFooter = ({ isChatOpen, toggleChat }) => {
               </IconButton>
             </Tooltip>
           ) : null,
-<<<<<<< HEAD
           // isAllowedToPublish.audio && audiopluginRef.current?.isSupported() ? (
           //   <Button
           //     iconOnly
@@ -297,29 +296,6 @@ export const ConferenceFooter = ({ isChatOpen, toggleChat }) => {
           //     <NoiseSupressionIcon />
           //   </Button>
           // ) : null,
-=======
-          isAllowedToPublish.audio && audiopluginRef.current?.isSupported() ? (
-            <Tooltip
-              title={`Turn ${
-                !isNoiseSuppression ? "on" : "off"
-              } noise suppression`}
-            >
-              <IconButton
-                className="ml-2"
-                active={!isNoiseSuppression}
-                onClick={handleNoiseSuppression}
-                key="noiseSuppression"
-              >
-                <AudioLevelIcon />
-              </IconButton>
-            </Tooltip>
-          ) : null,
-          FeatureFlags.enableTranscription &&
-          browserSupportsTranscription &&
-          isAllowedToPublish.audio ? (
-            <TranscriptionButton />
-          ) : null,
->>>>>>> 9d920a843ce56da1c6406659dd211d379a9c7147
           isPublishing && (
             <span key="SettingsLeftSpace" className="mx-2 md:mx-3"></span>
           ),
