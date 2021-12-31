@@ -86,7 +86,7 @@ const AppContextProvider = ({
     [roleNames, policyConfig, rolesMap]
   );
   initialLoginInfo.roomId = roomId;
-  // initialLoginInfo.username = username || "Anonymous User";
+
   const [state, setState] = useState({
     loginInfo: initialLoginInfo,
     maxTileCount: uiSettingsFromStorage.maxTileCount,
