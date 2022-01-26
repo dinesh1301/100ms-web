@@ -22,9 +22,12 @@ import {
 import { hmsToast } from "./views/components/notifications/hms-toast";
 import { Notifications } from "./views/components/notifications/Notifications";
 
-import create from "zustand";
-import { HMSRoomProvider as ReactRoomProvider } from "@100mslive/react-sdk";
-import { HMSReactiveStore } from "@100mslive/hms-video-store";
+import {
+  HMSRoomProvider as ReactRoomProvider,
+  HMSReactiveStore,
+} from "@100mslive/react-sdk";
+import { FeatureFlags } from "./store/FeatureFlags";
+import { lightTheme } from "@100mslive/react-ui";
 
 const defaultTokenEndpoint = process.env
   .REACT_APP_TOKEN_GENERATION_ENDPOINT_DOMAIN
@@ -34,6 +37,17 @@ const defaultTokenEndpoint = process.env
   : process.env.REACT_APP_TOKEN_GENERATION_ENDPOINT;
 
 const envPolicyConfig = JSON.parse(process.env.REACT_APP_POLICY_CONFIG || "{}");
+
+let appName = "";
+if (window.location.host.includes("localhost")) {
+  appName = "localhost";
+} else {
+  appName = window.location.host.split(".")[0];
+}
+
+document.title = `${appName}'s ${document.title}`;
+
+const hmsReactiveStore = new HMSReactiveStore();
 
 export function EdtechComponent({
   roomId = "",
@@ -55,10 +69,6 @@ export function EdtechComponent({
   getUserToken = defaultGetUserToken,
   policyConfig = envPolicyConfig,
 }) {
-  const hmsReactiveStore = new HMSReactiveStore();
-  const errFn = () => {
-    throw new Error("modifying store is not allowed");
-  };
   const { 0: width, 1: height } = aspectRatio
     .split("-")
     .map(el => parseInt(el));
@@ -66,7 +76,7 @@ export function EdtechComponent({
     <div
       className={`w-full dark:bg-black ${
         headerPresent === "true" ? "flex-1" : "h-full"
-      }`}
+      } ${theme === "light" ? lightTheme : ""}`}
     >
       <HMSThemeProvider
         config={{
@@ -99,23 +109,24 @@ export function EdtechComponent({
         toast={(message, options = {}) => hmsToast(message, options)}
       >
         <ReactRoomProvider
-          actions={hmsReactiveStore.getHMSActions()}
-          store={create({
-            ...hmsReactiveStore.getStore(),
-            setState: errFn,
-            destroy: errFn,
-          })}
+          actions={hmsReactiveStore.getActions()}
+          store={hmsReactiveStore.getStore()}
           notifications={hmsReactiveStore.getNotifications()}
+          stats={
+            FeatureFlags.enableStatsForNerds
+              ? hmsReactiveStore.getStats()
+              : undefined
+          }
         >
           <HMSRoomProvider
-            actions={hmsReactiveStore.getHMSActions()}
-            store={create({
-              ...hmsReactiveStore.getStore(),
-              setState: errFn,
-              destroy: errFn,
-            })}
+            actions={hmsReactiveStore.getActions()}
+            store={hmsReactiveStore.getStore()}
             notifications={hmsReactiveStore.getNotifications()}
-            webrtcInternals={hmsReactiveStore.getWebrtcInternals()}
+            stats={
+              FeatureFlags.enableStatsForNerds
+                ? hmsReactiveStore.getStats()
+                : undefined
+            }
           >
             <AppContextProvider
               roomId={roomId}

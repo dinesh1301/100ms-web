@@ -1,8 +1,13 @@
 import { useEffect } from "react";
+import { parsedUserAgent } from "@100mslive/hms-video-react";
 
 export class FeatureFlags {
-  static enableTranscription = process.env.REACT_APP_ENABLE_TRANSCRIPTION;
-
+  static enableTranscription =
+    process.env.REACT_APP_ENABLE_TRANSCRIPTION === "true";
+  static enableStatsForNerds =
+    process.env.REACT_APP_ENABLE_STATS_FOR_NERDS === "true";
+  static enableNewComponents =
+    process.env.REACT_APP_ENABLE_NEW_COMPONENTS === "true";
   static init() {
     if (!window.HMS) {
       window.HMS = {};
@@ -15,6 +20,10 @@ export class FeatureFlags {
     window.HMS.ALWAYS_REQUEST_PERMISSIONS = false;
     // update beam notification after server sends notification(remove flag)
     window.HMS.NEW_BEAM_STATE = true;
+
+    if (parsedUserAgent.getOS().name.toLowerCase() === "ios") {
+      window.HMS.GAIN_VALUE = 10;
+    }
   }
 
   static optimiseHLSLatency() {

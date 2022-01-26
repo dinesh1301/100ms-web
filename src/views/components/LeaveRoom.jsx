@@ -1,28 +1,25 @@
 import { Fragment, useState } from "react";
 import {
-  Button,
   ContextMenu,
   ContextMenuItem,
-  HangUpIcon,
-  isMobileDevice,
   MessageModal,
   selectPermissions,
   useHMSActions,
   useHMSStore,
 } from "@100mslive/hms-video-react";
 import { useHistory, useParams } from "react-router-dom";
+import { HangUpIcon } from "@100mslive/react-icons";
+import { Button, Text } from "@100mslive/react-ui";
 import { get } from "../../ApiRequests";
 
 export const LeaveRoom = () => {
   const history = useHistory();
   const params = useParams();
-  const [showEndRoomModal, setShowEndRoomModal] = useState(false);
-  const [showLeaveCall, setShowLeaveCall] = useState(false);
-  const [lockRoom, setLockRoom] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const permissions = useHMSStore(selectPermissions);
   const hmsActions = useHMSActions();
   const [redirectStarted, setRedirectedStarted] = useState(false);
+  const [showLeaveCall, setShowLeaveCall] = useState(false);
 
   const leaveRoom = () => {
     hmsActions.leave();
@@ -37,13 +34,13 @@ export const LeaveRoom = () => {
     )
       .then(response => {
         console.log("response from redirect", response);
-        setRedirectedStarted(false);
+        // setRedirectedStarted(false);
         // history.push(`${response.data.endcall_url}`);
         window.location = `${response.data.endcall_url}`;
       })
       .catch(err => {
         console.error("Couldn't end the call properly", err);
-        setRedirectedStarted(false);
+        // setRedirectedStarted(false);
       });
     // Get redirect url here
     // if (params.role) {
@@ -55,21 +52,7 @@ export const LeaveRoom = () => {
 
   return (
     <Fragment>
-      <Button
-        size="md"
-        shape="rectangle"
-        variant="danger"
-        iconOnly={isMobileDevice()}
-        active={isMobileDevice()}
-        key="LeaveRoom"
-        onClick={() => {
-          setShowLeaveCall(true);
-        }}
-      >
-        <HangUpIcon className={isMobileDevice() ? "" : "mr-2"} key="hangUp" />
-        {isMobileDevice() ? "" : "Leave room"}
-      </Button>
-      {/* <ContextMenu
+      <ContextMenu
         classes={{
           trigger: "w-auto h-auto",
           root: "static",
@@ -77,18 +60,17 @@ export const LeaveRoom = () => {
           menuItem: "hover:bg-transparent-0 dark:hover:bg-transparent-0",
         }}
         onTrigger={value => {
-          // if (permissions?.endRoom) {
-          //   setShowMenu(value);
-          // } else {
-          // leaveRoom();
-          console.log("onlcick Value", value);
           setShowLeaveCall(true);
-          // }
         }}
-        menuOpen={false}
+        menuOpen={showMenu}
         key="LeaveAction"
         trigger={
-         
+          <Button variant="danger" key="LeaveRoom">
+            <HangUpIcon key="hangUp" />
+            <Text variant="body" css={{ ml: "$2", "@md": { display: "none" } }}>
+              Leave Room
+            </Text>
+          </Button>
         }
         menuProps={{
           anchorOrigin: {
@@ -100,123 +82,26 @@ export const LeaveRoom = () => {
             horizontal: "center",
           },
         }}
-      > */}
-      {/* {permissions?.endRoom && (
-          <ContextMenuItem
-            label="End Room"
-            key="endRoom"
-            classes={{
-              menuTitleContainer: "hidden",
-              menuItemChildren: "my-1 w-full",
-            }}
-          >
-            <Button
-              shape="rectangle"
-              variant="standard"
-              classes={{ root: "w-full" }}
-              onClick={() => {
-                setShowEndRoomModal(true);
-              }}
-            >
-              End Room for all
-            </Button>
-          </ContextMenuItem>
-        )}}
-        {/* <ContextMenuItem
+      >
+        <ContextMenuItem
           label="Leave Room"
           key="leaveRoom"
           classes={{
             menuTitleContainer: "hidden",
             menuItemChildren: "my-1 w-full overflow-hidden",
           }}
-        > */}
-
-      <MessageModal
-        show={showEndRoomModal}
-        onClose={() => {
-          setShowEndRoomModal(false);
-          setLockRoom(false);
-        }}
-        title="End Room"
-        body="Are you sure you want to end the room?"
-        footer={
-          <div className="flex">
-            <div className="flex items-center">
-              <label className="text-base dark:text-white text-gray-100">
-                <input
-                  type="checkbox"
-                  className="mr-1"
-                  onChange={() => setLockRoom(prev => !prev)}
-                  checked={lockRoom}
-                />
-                <span>Lock room</span>
-              </label>
-            </div>
-            <Button
-              classes={{ root: "mr-3 ml-3" }}
-              onClick={() => {
-                setShowEndRoomModal(false);
-                setLockRoom(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="danger"
-              onClick={() => {
-                hmsActions.endRoom(lockRoom, "End Room");
-                leaveRoom();
-              }}
-            >
-              End Room
-            </Button>
-          </div>
-        }
-      />
-      <MessageModal
-        show={showLeaveCall}
-        onClose={() => {
-          setShowLeaveCall(false);
-          setLockRoom(false);
-        }}
-        title="Leave Video Call"
-        body="Are you sure, you want to leave the video call?"
-        footer={
-          <div className="flex">
-            {/* <div className="flex items-center">
-              <label className="text-base dark:text-white text-gray-100">
-                <input
-                  type="checkbox"
-                  className="mr-1"
-                  onChange={() => setLockRoom(prev => !prev)}
-                  checked={lockRoom}
-                />
-                <span>Lock room</span>
-              </label>
-            </div> */}
-            <Button
-              disabled={redirectStarted}
-              classes={{ root: "mr-3 ml-3" }}
-              onClick={() => {
-                setShowLeaveCall(false);
-                setLockRoom(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              disabled={redirectStarted}
-              variant="danger"
-              onClick={() => {
-                // hmsActions.endRoom(lockRoom, "End Room");
-                leaveRoom();
-              }}
-            >
-              Leave Room
-            </Button>
-          </div>
-        }
-      />
+        >
+          <Button
+            variant="danger"
+            className="w-full"
+            onClick={() => {
+              leaveRoom();
+            }}
+          >
+            Sure?
+          </Button>
+        </ContextMenuItem>
+      </ContextMenu>
     </Fragment>
   );
 };

@@ -69,6 +69,7 @@ const defaultUiSettings = {
     METADATA_UPDATED: true,
   },
   uiViewMode: "grid",
+  showStatsOnTiles: false,
 };
 
 // const uiSettingsFromStorage = localStorage.getItem(UI_SETTINGS_KEY)
@@ -104,6 +105,7 @@ const AppContextProvider = ({
     subscribedNotifications:
       uiSettingsFromStorage.subscribedNotifications || {},
     uiViewMode: uiSettingsFromStorage.uiViewMode || "grid",
+    showStatsOnTiles: uiSettingsFromStorage.showStatsOnTiles || false,
   });
 
   useEffect(() => {
@@ -113,9 +115,15 @@ const AppContextProvider = ({
         maxTileCount: state.maxTileCount,
         subscribedNotifications: state.subscribedNotifications,
         uiViewMode: state.uiViewMode,
+        showStatsOnTiles: state.showStatsOnTiles,
       })
     );
-  }, [state.maxTileCount, state.subscribedNotifications, state.uiViewMode]);
+  }, [
+    state.maxTileCount,
+    state.subscribedNotifications,
+    state.uiViewMode,
+    state.showStatsOnTiles,
+  ]);
 
   useEffect(() => {
     if (state.loginInfo.username) {
@@ -176,8 +184,13 @@ const AppContextProvider = ({
         [notification.type]: notification.isSubscribed,
       },
     }));
+
   const deepSetuiViewMode = layout =>
     setState(prevState => ({ ...prevState, uiViewMode: layout }));
+
+  const deepSetShowStatsOnTiles = show =>
+    setState(prevState => ({ ...prevState, showStatsOnTiles: show }));
+
   return (
     <AppContext.Provider
       value={{
@@ -185,6 +198,8 @@ const AppContextProvider = ({
         setMaxTileCount: deepSetMaxTiles,
         setSubscribedNotifications: deepSetSubscribedNotifications,
         setuiViewMode: deepSetuiViewMode,
+        setShowStatsOnTiles: deepSetShowStatsOnTiles,
+        showStatsOnTiles: state.showStatsOnTiles,
         uiViewMode: state.uiViewMode,
         loginInfo: state.loginInfo,
         maxTileCount: state.maxTileCount,

@@ -1,17 +1,23 @@
-import React, { useState, useMemo } from "react";
+import React, {
+  useState,
+  useMemo,
+  Fragment,
+  useContext,
+  useEffect,
+} from "react";
+import { Button, MessageModal, Text } from "@100mslive/hms-video-react";
 import {
-  Button,
-  MessageModal,
-  Text,
   useHMSActions,
   useHMSStatsStore,
-  selectHMSStats,
   useHMSStore,
+  selectHMSStats,
   selectTracksMap,
   selectPeerNameByID,
-} from "@100mslive/hms-video-react";
+} from "@100mslive/react-sdk";
+import { Switch } from "@100mslive/react-ui";
 import { hmsToast } from "./notifications/hms-toast";
 import { USERNAME_KEY } from "../../common/constants";
+import { AppContext } from "../../store/AppContext";
 
 const defaultClasses = {
   formInner: "w-full flex flex-col md:flex-row my-1.5",
@@ -110,7 +116,7 @@ const StatsRow = ({ label, value }) => (
 );
 
 const formatBytes = (bytes, unit = "B", decimals = 2) => {
-  if (bytes === 0) return "0 Bytes";
+  if (bytes === 0) return "0 " + unit;
 
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
@@ -124,8 +130,6 @@ const formatBytes = (bytes, unit = "B", decimals = 2) => {
 };
 
 const LocalPeerStats = () => {
-  const jitter = useHMSStatsStore(selectHMSStats.jitter);
-  const packetsLost = useHMSStatsStore(selectHMSStats.packetsLost);
   const stats = useHMSStatsStore(selectHMSStats.localPeerStats);
 
   if (!stats) {
@@ -134,23 +138,23 @@ const LocalPeerStats = () => {
 
   return (
     <div className="m-4 mt-6">
-      <StatsRow label="Packets Lost" value={packetsLost} />
-      <StatsRow label="Jitter" value={jitter} />
+      <StatsRow label="Packets Lost" value={stats.subscribe?.packetsLost} />
+      <StatsRow label="Jitter" value={stats.subscribe?.jitter} />
       <StatsRow
         label="Publish Bitrate"
-        value={formatBytes(stats.publish.bitrate, "b/s")}
+        value={formatBytes(stats.publish?.bitrate, "b/s")}
       />
       <StatsRow
         label="Subscribe Bitrate"
-        value={formatBytes(stats.subscribe.bitrate, "b/s")}
+        value={formatBytes(stats.subscribe?.bitrate, "b/s")}
       />
       <StatsRow
         label="Total Bytes Sent"
-        value={formatBytes(stats.publish.bytesSent)}
+        value={formatBytes(stats.publish?.bytesSent)}
       />
       <StatsRow
         label="Total Bytes Received"
-        value={formatBytes(stats.subscribe.bytesReceived)}
+        value={formatBytes(stats.subscribe?.bytesReceived)}
       />
     </div>
   );
@@ -199,8 +203,15 @@ const StatsTrackOption = ({ track }) => {
 
 export const StatsForNerds = ({ showModal, onCloseModal }) => {
   const tracksMap = useHMSStore(selectTracksMap);
-  const tracks = useMemo(() => Object.values(tracksMap), [tracksMap]);
+  const trackIDs = useMemo(() => Object.keys(tracksMap), [tracksMap]);
+  const { showStatsOnTiles, setShowStatsOnTiles } = useContext(AppContext);
   const [selectedStat, setSelectedStat] = useState("local-peer");
+
+  useEffect(() => {
+    if (selectedStat !== "local-peer" && !trackIDs.includes(selectedStat)) {
+      setSelectedStat("local-peer");
+    }
+  }, [trackIDs, selectedStat]);
 
   return (
     <MessageModal
@@ -210,7 +221,7 @@ export const StatsForNerds = ({ showModal, onCloseModal }) => {
       }}
       title="Stats For Nerds"
       body={
-        <div>
+        <Fragment>
           <div className="flex justify-center items-center">
             Stats for
             <div className={defaultClasses.selectContainer}>
@@ -220,8 +231,8 @@ export const StatsForNerds = ({ showModal, onCloseModal }) => {
                 onChange={e => setSelectedStat(e.target.value)}
               >
                 <option value="local-peer">Your Stats</option>
-                {tracks.map(track => (
-                  <StatsTrackOption track={track} />
+                {trackIDs.map(trackID => (
+                  <StatsTrackOption key={trackID} track={tracksMap[trackID]} />
                 ))}
               </select>
             </div>
@@ -231,7 +242,15 @@ export const StatsForNerds = ({ showModal, onCloseModal }) => {
           ) : (
             <TrackStats trackID={selectedStat} />
           )}
-        </div>
+          <hr />
+          <div className="flex justify-evenly items-center mt-4">
+            <h3 className="text-base">Show Stats on Tiles</h3>
+            <Switch
+              checked={showStatsOnTiles}
+              onCheckedChange={setShowStatsOnTiles}
+            />
+          </div>
+        </Fragment>
       }
     />
   );
