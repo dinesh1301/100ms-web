@@ -193,7 +193,7 @@ export const ConferenceFooter = ({ isChatOpen, toggleChat }) => {
               </IconButton>
             </Tooltip>
           ) : null,
-          isAllowedToPublish.video ? <VirtualBackground key="vb" /> : null,
+          // isAllowedToPublish.video ? <VirtualBackground key="vb" /> : null,
           isAllowedToPublish.audio ? (
             <NoiseSuppression key="noiseSupression" />
           ) : null,
