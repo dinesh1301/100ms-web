@@ -93,31 +93,31 @@ export const ConferenceFooter = ({ isChatOpen, toggleChat }) => {
   const leftComponents = [];
   const isAudioScreenshare = !video && !!audio;
 
-  if (isAllowedToPublish.screen && isScreenshareSupported()) {
-    leftComponents.push(
-      <Tooltip
-        title={`${!isAudioScreenshare ? "Start" : "Stop"} audio sharing`}
-        key="shareAudio"
-      >
-        <IconButton
-          active={!isAudioScreenshare}
-          onClick={() => {
-            if (isAudioScreenshare) {
-              toggleScreenShare(false, true);
-            } else {
-              setShareAudioModal(true);
-            }
-          }}
-          css={{ "@md": { display: "none" } }}
-        >
-          <MusicIcon />
-        </IconButton>
-      </Tooltip>,
-      <Box key="audioShareDivider" css={{ "@md": { display: "none" } }}>
-        <VerticalDivider />
-      </Box>
-    );
-  }
+  // if (isAllowedToPublish.screen && isScreenshareSupported()) {
+  //   leftComponents.push(
+  //     <Tooltip
+  //       title={`${!isAudioScreenshare ? "Start" : "Stop"} audio sharing`}
+  //       key="shareAudio"
+  //     >
+  //       <IconButton
+  //         active={!isAudioScreenshare}
+  //         onClick={() => {
+  //           if (isAudioScreenshare) {
+  //             toggleScreenShare(false, true);
+  //           } else {
+  //             setShareAudioModal(true);
+  //           }
+  //         }}
+  //         css={{ "@md": { display: "none" } }}
+  //       >
+  //         <MusicIcon />
+  //       </IconButton>
+  //     </Tooltip>,
+  //     <Box key="audioShareDivider" css={{ "@md": { display: "none" } }}>
+  //       <VerticalDivider />
+  //     </Box>
+  //   );
+  // }
   leftComponents.push(
     <Button
       key="chat"
@@ -147,27 +147,27 @@ export const ConferenceFooter = ({ isChatOpen, toggleChat }) => {
   //       />
   //     </Box>
   //   );
-  leftComponents.push(
-    <Tooltip
-      title={`${!isHandRaised ? "Raise" : "Unraise"} hand`}
-      key="raise-hand"
-    >
-      <IconButton onClick={toggleHandRaise} active={!isHandRaised}>
-        <HandIcon />
-      </IconButton>
-    </Tooltip>
-  );
-  leftComponents.push(
-    <Tooltip title={` Turn ${!isBRBOn ? "on" : "off"} BRB`} key="brb">
-      <IconButton
-        css={{ mx: "$2", "@md": { display: "none" } }}
-        onClick={toggleBRB}
-        active={!isBRBOn}
-      >
-        <BrbIcon />
-      </IconButton>
-    </Tooltip>
-  );
+  // leftComponents.push(
+  //   <Tooltip
+  //     title={`${!isHandRaised ? "Raise" : "Unraise"} hand`}
+  //     key="raise-hand"
+  //   >
+  //     <IconButton onClick={toggleHandRaise} active={!isHandRaised}>
+  //       <HandIcon />
+  //     </IconButton>
+  //   </Tooltip>
+  // );
+  // leftComponents.push(
+  //   <Tooltip title={` Turn ${!isBRBOn ? "on" : "off"} BRB`} key="brb">
+  //     <IconButton
+  //       css={{ mx: "$2", "@md": { display: "none" } }}
+  //       onClick={toggleBRB}
+  //       active={!isBRBOn}
+  //     >
+  //       <BrbIcon />
+  //     </IconButton>
+  //   </Tooltip>
+  // );
 
   const isPublishing = isAllowedToPublish.video || isAllowedToPublish.audio;
   if (!isConnected) {
