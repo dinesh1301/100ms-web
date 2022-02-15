@@ -51,7 +51,16 @@ console.log(
   process.env.REACT_APP_TOKEN_GENERATION_ENDPOINT_DOMAIN,
   process.env.REACT_APP_TOKEN_GENERATION_ENDPOINT
 );
-const envPolicyConfig = JSON.parse(process.env.REACT_APP_POLICY_CONFIG || "{}");
+const envPolicyConfig = {
+  host: {
+    center: ["host", "guest"],
+    sidepane: [],
+  },
+  guest: {
+    center: ["host", "guest"],
+    sidepane: [],
+  },
+};
 const envAudioPlaylist = JSON.parse(
   process.env.REACT_APP_AUDIO_PLAYLIST || "[]"
 );

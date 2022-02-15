@@ -92,7 +92,7 @@ export const ConferenceFooter = ({ isChatOpen, toggleChat }) => {
 
   const leftComponents = [];
   const isAudioScreenshare = !video && !!audio;
-
+  // Just for commiting
   // if (isAllowedToPublish.screen && isScreenshareSupported()) {
   //   leftComponents.push(
   //     <Tooltip
