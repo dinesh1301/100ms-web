@@ -21,6 +21,14 @@ import {
 } from "./services/tokenService";
 import { hmsToast } from "./views/components/notifications/hms-toast";
 import { Notifications } from "./views/components/notifications/Notifications";
+
+import {
+  HMSRoomProvider as ReactRoomProvider,
+  HMSReactiveStore,
+} from "@100mslive/react-sdk";
+import { FeatureFlags } from "./store/FeatureFlags";
+import { lightTheme } from "@100mslive/react-ui";
+
 const defaultTokenEndpoint = process.env
   .REACT_APP_TOKEN_GENERATION_ENDPOINT_DOMAIN
   ? `${getBackendEndpoint()}${
@@ -29,6 +37,17 @@ const defaultTokenEndpoint = process.env
   : process.env.REACT_APP_TOKEN_GENERATION_ENDPOINT;
 
 const envPolicyConfig = JSON.parse(process.env.REACT_APP_POLICY_CONFIG || "{}");
+
+let appName = "";
+if (window.location.host.includes("localhost")) {
+  appName = "localhost";
+} else {
+  appName = window.location.host.split(".")[0];
+}
+
+document.title = `${appName}'s ${document.title}`;
+
+const hmsReactiveStore = new HMSReactiveStore();
 
 export function EdtechComponent({
   roomId = "",
@@ -45,11 +64,11 @@ export function EdtechComponent({
     avatarType = "initial",
     headerPresent = "false",
     logoClass = "",
+    metadata = "",
   },
   getUserToken = defaultGetUserToken,
   policyConfig = envPolicyConfig,
 }) {
- 
   const { 0: width, 1: height } = aspectRatio
     .split("-")
     .map(el => parseInt(el));
@@ -57,7 +76,7 @@ export function EdtechComponent({
     <div
       className={`w-full dark:bg-black ${
         headerPresent === "true" ? "flex-1" : "h-full"
-      }`}
+      } ${theme === "light" ? lightTheme : ""}`}
     >
       <HMSThemeProvider
         config={{
@@ -89,83 +108,104 @@ export function EdtechComponent({
         }}
         toast={(message, options = {}) => hmsToast(message, options)}
       >
-        <HMSRoomProvider>
-          <AppContextProvider
-            roomId={roomId}
-            tokenEndpoint={tokenEndpoint}
-            policyConfig={policyConfig}
+        <ReactRoomProvider
+          actions={hmsReactiveStore.getActions()}
+          store={hmsReactiveStore.getStore()}
+          notifications={hmsReactiveStore.getNotifications()}
+          stats={
+            FeatureFlags.enableStatsForNerds
+              ? hmsReactiveStore.getStats()
+              : undefined
+          }
+        >
+          <HMSRoomProvider
+            actions={hmsReactiveStore.getActions()}
+            store={hmsReactiveStore.getStore()}
+            notifications={hmsReactiveStore.getNotifications()}
+            stats={
+              FeatureFlags.enableStatsForNerds
+                ? hmsReactiveStore.getStats()
+                : undefined
+            }
           >
-            <Router>
-              <Notifications />
-              <Switch>
-                {/* <Route path="/createRoom">
-              <CreateRoom />
-            </Route> */}
-                <Route
-                  path="/preview/:roomId/:role?"
-                  render={({ match }) => {
-                    const { params } = match;
-                    if (!params.roomId && !params.role) {
-                      return <Redirect to="/" />;
-                    }
-                    if (
-                      !params.roomId ||
-                      ["preview", "meeting", "leave"].includes(params.roomId)
-                    ) {
-                      return <Redirect to="/" />;
-                    }
-                    return <PreviewScreen getUserToken={getUserToken} />;
-                  }}
-                />
-                <Route path="/meeting/:roomId/:role?">
-                  <Conference />
-                </Route>
-                <Route
-                  path="/leave/:roomId/:role?"
-                  render={({ history, match }) => (
-                    <PostLeaveDisplay
-                      goToDashboardOnClick={() => {
-                        window.open("https://dashboard.100ms.live/", "_blank");
-                      }}
-                      joinRoomOnClick={() => {
-                        let previewUrl = "/preview/" + match.params.roomId;
-                        if (match.params.role)
-                          previewUrl += "/" + match.params.role;
-                        history.push(previewUrl);
-                      }}
-                      getFeedbackOnClick={setShowModal => {
-                        setShowModal(true);
-                      }}
-                    />
-                  )}
-                />
-                <Route
-                  path="/:roomId/:role?"
-                  render={({ match }) => {
-                    const { params } = match;
-                    if (!params.roomId && !params.role) {
-                      return <Redirect to="/" />;
-                    }
-                    if (!params.roomId) {
-                      return <Redirect to="/" />;
-                    }
-                    return (
-                      <Redirect
-                        to={`/preview/${params.roomId}/${params.role || ""}`}
-                      />
-                    );
-                  }}
-                />
-                <Route
-                  path="*"
-                  render={() => <ErrorPage error="Invalid URL!" />}
-                />
-              </Switch>
-            </Router>
-          </AppContextProvider>
-        </HMSRoomProvider>
+            <AppContextProvider
+              roomId={roomId}
+              tokenEndpoint={tokenEndpoint}
+              policyConfig={policyConfig}
+              appDetails={metadata}
+            >
+              <AppRoutes getUserToken={getUserToken} />
+            </AppContextProvider>
+          </HMSRoomProvider>
+        </ReactRoomProvider>
       </HMSThemeProvider>
     </div>
+  );
+}
+
+function AppRoutes({ getUserToken }) {
+  return (
+    <Router>
+      <Notifications />
+      <Switch>
+        {/* <Route path="/createRoom">
+              <CreateRoom />
+            </Route> */}
+        <Route
+          path="/preview/:roomId/:role?"
+          render={({ match }) => {
+            const { params } = match;
+            if (!params.roomId && !params.role) {
+              return <Redirect to="/" />;
+            }
+            if (
+              !params.roomId ||
+              ["preview", "meeting", "leave"].includes(params.roomId)
+            ) {
+              return <Redirect to="/" />;
+            }
+            return <PreviewScreen getUserToken={getUserToken} />;
+          }}
+        />
+        <Route path="/meeting/:roomId/:role?">
+          <Conference />
+        </Route>
+        <Route
+          path="/leave/:roomId/:role?"
+          render={({ history, match }) => (
+            <PostLeaveDisplay
+              goToDashboardOnClick={() => {
+                window.open("https://dashboard.100ms.live/", "_blank");
+              }}
+              joinRoomOnClick={() => {
+                let previewUrl = "/preview/" + match.params.roomId;
+                if (match.params.role) previewUrl += "/" + match.params.role;
+                history.push(previewUrl);
+              }}
+              getFeedbackOnClick={setShowModal => {
+                setShowModal(true);
+              }}
+            />
+          )}
+        />
+        <Route
+          path="/:roomId/:role?"
+          render={({ match }) => {
+            const { params } = match;
+            if (!params.roomId && !params.role) {
+              return <Redirect to="/" />;
+            }
+            if (!params.roomId) {
+              return <Redirect to="/" />;
+            }
+            return (
+              <Redirect to={`/preview/${params.roomId}/${params.role || ""}`} />
+            );
+          }}
+        />
+        <Route path="*" render={() => <ErrorPage error="Invalid URL!" />} />
+      </Switch>
+    </Router>
   );
 }
 
@@ -184,6 +224,7 @@ export default function App() {
         avatarType: process.env.REACT_APP_AVATAR_TYPE,
         logoClass: process.env.REACT_APP_LOGO_CLASS,
         headerPresent: process.env.REACT_APP_HEADER_PRESENT,
+        metadata: process.env.REACT_APP_DEFAULT_APP_DETAILS, // A stringified object in env
       }}
       getUserToken={defaultGetUserToken}
     />

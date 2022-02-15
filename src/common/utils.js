@@ -39,21 +39,41 @@ export function getBlurClass(isParticipantListOpen, totalPeers) {
 }
 
 export function getRandomVirtualBackground() {
-  let imagesList = [
+  let backgroundList = [
+    "blur",
     "https://www.100ms.live/images/vb-1.jpeg",
     "https://www.100ms.live/images/vb-2.jpg",
-    "blur",
   ];
 
-  let randomIdx = Math.floor(Math.random() * imagesList.length);
-  if (randomIdx === 2) {
-    return "blur";
+  if (process.env["REACT_APP_VIDEO_VB"]) {
+    let gifList = ["https://www.100ms.live/images/vb-1.gif"];
+    backgroundList.push(...gifList);
+
+    let videoList = [
+      "https://www.100ms.live/images/video-1.mp4",
+      "https://www.100ms.live/images/video-2.mp4",
+      "https://www.100ms.live/images/video-5.mp4",
+      "https://www.100ms.live/images/video-7.mp4",
+      "https://www.100ms.live/images/video-8.mp4",
+    ];
+    backgroundList.push(...videoList);
   }
 
-  const img = document.createElement("img");
-  img.alt = "VB";
-  img.src = imagesList[randomIdx];
-  return img;
+  let randomIdx = Math.floor(Math.random() * backgroundList.length);
+  if (randomIdx === 0) {
+    return "blur";
+  } else if (randomIdx === 1 || randomIdx === 2) {
+    const img = document.createElement("img");
+    img.alt = "VB";
+    img.src = backgroundList[randomIdx];
+    return img;
+  } else if (randomIdx === 3) {
+    return backgroundList[randomIdx];
+  } else {
+    const videoEl = document.createElement("video");
+    videoEl.src = backgroundList[randomIdx];
+    return videoEl;
+  }
 }
 
 /**
@@ -99,4 +119,32 @@ export const setFullScreenEnabled = async setFullScreen => {
       hmsToast(error.message);
     }
   }
+};
+
+export const getMetadata = metadataString => {
+  try {
+    return metadataString === "" ? {} : JSON.parse(metadataString);
+  } catch (error) {
+    return {};
+  }
+};
+
+export const metadataProps = function (peer, track) {
+  return {
+    isHandRaised: getMetadata(peer.metadata)?.isHandRaised,
+  };
+};
+
+export const chatStyle = {
+  position: "fixed",
+  bottom: "4.5rem",
+  zIndex: 40,
+  right: 8,
+  width: "100%",
+  maxWidth: 300,
+  minHeight: 440,
+};
+
+export const isScreenshareSupported = () => {
+  return typeof navigator.mediaDevices.getDisplayMedia !== "undefined";
 };

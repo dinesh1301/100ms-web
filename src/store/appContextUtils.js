@@ -1,10 +1,11 @@
 import LogRocket from "logrocket";
+import { FeatureFlags } from "./FeatureFlags";
 
 export const convertLoginInfoToJoinConfig = loginInfo => {
   const joinConfig = {
     userName: loginInfo.username,
     authToken: loginInfo.token,
-    metaData: loginInfo.role,
+    metaData: "",
     initEndpoint: loginInfo.env
       ? `https://${loginInfo.env.split("-")[0]}-init.100ms.live/init`
       : "https://prod-init.100ms.live/init",
@@ -16,6 +17,7 @@ export const convertLoginInfoToJoinConfig = loginInfo => {
       videoDeviceId: loginInfo.selectedVideoInput,
     },
     rememberDeviceSelection: true,
+    alwaysRequestPermissions: FeatureFlags.alwaysRequestPermissions(),
   };
   console.debug("app: Config is", joinConfig);
   return joinConfig;

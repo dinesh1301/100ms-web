@@ -12,8 +12,8 @@ import {
   useHMSActions,
   useHMSStore,
 } from "@100mslive/hms-video-react";
+import { Box, Flex } from "@100mslive/react-ui";
 import FullPageProgress from "../views/components/FullPageSpinner";
-import { useQuery } from "../hooks";
 
 export const Conference = () => {
   const history = useHistory();
@@ -34,6 +34,7 @@ export const Conference = () => {
   }, []);
 
   const { loginInfo } = context;
+  const isHeadless = loginInfo.isHeadlessMode;
 
   useEffect(() => {
     if (!roomId) {
@@ -58,22 +59,26 @@ export const Conference = () => {
   }
 
   return (
-    <div className="w-full h-full flex flex-col dark:bg-black">
-      <div className="h-14 md:h-16">
-        <ConferenceHeader onParticipantListOpen={onParticipantListOpen} />
-      </div>
-      <div className="w-full flex flex-1 flex-col md:flex-row">
+    <Flex css={{ size: "100%", bg: "$bg" }} direction="column">
+      {!isHeadless && (
+        <Box css={{ h: "$6", "@md": { h: "$header" } }}>
+          <ConferenceHeader onParticipantListOpen={onParticipantListOpen} />
+        </Box>
+      )}
+      <Box css={{ w: "100%", flex: "1 1 0" }}>
         <ConferenceMainView
           isChatOpen={isChatOpen}
           isParticipantListOpen={isParticipantListOpen}
           toggleChat={toggleChat}
         />
-      </div>
-      <div className="dark:bg-black" style={{ height: "10%" }}>
-        <ConferenceFooter isChatOpen={isChatOpen} toggleChat={toggleChat} />
-      </div>
+      </Box>
+      {!isHeadless && (
+        <Box css={{ h: "10%", bg: "$bg" }}>
+          <ConferenceFooter isChatOpen={isChatOpen} toggleChat={toggleChat} />
+        </Box>
+      )}
       <MessageModal
-        show={!!roleChangeRequest}
+        show={!!roleChangeRequest && !isHeadless}
         onClose={() => hmsActions.rejectChangeRole(roleChangeRequest)}
         title="Role Change Request"
         body={`Role change requested by ${roleChangeRequest?.requestedBy?.name}.
@@ -88,6 +93,6 @@ export const Conference = () => {
           </div>
         }
       />
-    </div>
+    </Flex>
   );
 };
