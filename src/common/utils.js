@@ -39,11 +39,7 @@ export function getBlurClass(isParticipantListOpen, totalPeers) {
 }
 
 export function getRandomVirtualBackground() {
-  let backgroundList = [
-    "blur",
-    "https://www.100ms.live/images/vb-1.jpeg",
-    "https://www.100ms.live/images/vb-2.jpg",
-  ];
+  let backgroundList = ["blur"];
 
   if (process.env["REACT_APP_VIDEO_VB"]) {
     let gifList = ["https://www.100ms.live/images/vb-1.gif"];
