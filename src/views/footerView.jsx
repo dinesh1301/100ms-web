@@ -116,6 +116,7 @@ export const ConferenceFooter = ({ isChatOpen, toggleChat }) => {
   //     <Box key="audioShareDivider" css={{ "@md": { display: "none" } }}>
   //       <VerticalDivider />
   //     </Box>
+
   //   );
   // }
   leftComponents.push(
