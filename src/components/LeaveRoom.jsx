@@ -28,12 +28,11 @@ import {
   DialogContent,
   DialogRow,
 } from "../primitives/DialogContent";
-import { useNavigation } from "./hooks/useNavigation";
+
 import { isStreamingKit } from "../common/utils";
 import { get } from "../ApiRequests";
 
 export const LeaveRoom = () => {
-  const navigate = useNavigation();
   const params = useParams();
   const [showEndRoomModal, setShowEndRoomModal] = useState(false);
   const [lockRoom, setLockRoom] = useState(false);
