@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import { useHMSActions } from "@100mslive/react-sdk";
-import { SendIcon, EmojiIcon } from "@100mslive/react-icons";
-import { Flex, styled, IconButton, Box, Popover } from "@100mslive/react-ui";
+import { EmojiIcon, SendIcon } from "@100mslive/react-icons";
+import { Box, Flex, IconButton, Popover, styled } from "@100mslive/react-ui";
 import { ToastManager } from "../Toast/ToastManager";
 import { useChatDraftMessage } from "../AppData/useChatState";
 import { useEmojiPickerStyles } from "./useEmojiPickerStyles";
@@ -14,6 +14,8 @@ const TextArea = styled("textarea", {
   color: "$textPrimary",
   resize: "none",
   lineHeight: "1rem",
+  position: "relative",
+  top: "$3",
   "&:focus": {
     boxShadow: "none",
     outline: "none",
@@ -128,6 +130,9 @@ export const ChatFooter = ({ role, peerId, onSend, children }) => {
         }}
         autoComplete="off"
         aria-autocomplete="none"
+        onPaste={e => e.stopPropagation()}
+        onCut={e => e.stopPropagation()}
+        onCopy={e => e.stopPropagation()}
       />
       <EmojiPicker
         onSelect={emoji => {

@@ -1,20 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useSearchParam } from "react-use";
 import { v4 } from "uuid";
 import { Box, Flex, Loading, styled } from "@100mslive/react-ui";
-import { Header } from "./Header";
-import { ErrorDialog } from "../primitives/DialogContent";
-import { useSetUiSettings, useTokenEndpoint } from "./AppData/useUISettings";
 import PreviewContainer from "./Preview/PreviewContainer";
 import SidePane from "../layouts/SidePane";
+import { ErrorDialog } from "../primitives/DialogContent";
+import { Header } from "./Header";
+import { useSetUiSettings, useTokenEndpoint } from "./AppData/useUISettings";
 import { useNavigation } from "./hooks/useNavigation";
 import getToken from "../services/tokenService";
 import {
-  QUERY_PARAM_SKIP_PREVIEW_HEADFUL,
-  QUERY_PARAM_NAME,
-  QUERY_PARAM_SKIP_PREVIEW,
   QUERY_PARAM_AUTH_TOKEN,
+  QUERY_PARAM_NAME,
+  QUERY_PARAM_PREVIEW_AS_ROLE,
+  QUERY_PARAM_SKIP_PREVIEW,
+  QUERY_PARAM_SKIP_PREVIEW_HEADFUL,
   UI_SETTINGS,
 } from "../common/constants";
 
@@ -48,6 +49,7 @@ const PreviewScreen = React.memo(({ getUserToken }) => {
   skipPreview = skipPreview || beamInToken || directJoinHeadful;
   const initialName =
     useSearchParam(QUERY_PARAM_NAME) || (skipPreview ? "Beam" : "");
+  const previewAsRole = useSearchParam(QUERY_PARAM_PREVIEW_AS_ROLE);
   let authToken = useSearchParam(QUERY_PARAM_AUTH_TOKEN);
 
   useEffect(() => {
@@ -103,6 +105,7 @@ const PreviewScreen = React.memo(({ getUserToken }) => {
               env={env}
               onJoin={onJoin}
               token={token}
+              asRole={previewAsRole}
             />
           </>
         ) : (

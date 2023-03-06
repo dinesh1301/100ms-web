@@ -1,26 +1,26 @@
-import React, { useRef, useState, useEffect, Fragment } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import {
-  useDevices,
   DeviceType,
-  useHMSStore,
-  selectLocalVideoTrackID,
   selectIsLocalVideoEnabled,
+  selectLocalVideoTrackID,
   selectVideoTrackByID,
+  useDevices,
+  useHMSStore,
 } from "@100mslive/react-sdk";
 import { MicOnIcon, SpeakerIcon, VideoOnIcon } from "@100mslive/react-icons";
 import {
-  Button,
-  Text,
-  Flex,
-  Dropdown,
   Box,
+  Button,
+  Dropdown,
+  Flex,
   StyledVideoTile,
+  Text,
   Video,
 } from "@100mslive/react-ui";
 import { DialogDropdownTrigger } from "../../primitives/DropdownTrigger";
+import { useUISettings } from "../AppData/useUISettings";
 import { useDropdownSelection } from "../hooks/useDropdownSelection";
 import { settingOverflow } from "./common.js";
-import { useUISettings } from "../AppData/useUISettings";
 import { UI_SETTINGS } from "../../common/constants";
 
 /**
@@ -28,7 +28,7 @@ import { UI_SETTINGS } from "../../common/constants";
  * it'll give the user options to change input/output device as well as check speaker.
  * There is also another controlled way of using this by passing in open and onOpenChange.
  */
-const Settings = () => {
+const Settings = ({ setHide }) => {
   const { allDevices, selectedDeviceIDs, updateDevice } = useDevices();
   const { videoInput, audioInput, audioOutput } = allDevices;
   const videoTrackId = useHMSStore(selectLocalVideoTrackID);
@@ -39,6 +39,19 @@ const Settings = () => {
   const mirrorLocalVideo = useUISettings(UI_SETTINGS.mirrorLocalVideo);
   const trackSelector = selectVideoTrackByID(videoTrackId);
   const track = useHMSStore(trackSelector);
+
+  /**
+   * Chromium browsers return an audioOutput with empty label when no permissions are given
+   */
+  const audioOutputFiltered = audioOutput?.filter(item => !!item.label) ?? [];
+
+  if (
+    !videoInput?.length &&
+    !audioInput?.length &&
+    !audioOutputFiltered?.length
+  ) {
+    setHide(true);
+  }
 
   return (
     <Box className={settingOverflow()}>
@@ -88,7 +101,7 @@ const Settings = () => {
           }
         />
       ) : null}
-      {audioOutput?.length && shouldShowAudioOutput ? (
+      {audioOutputFiltered?.length && shouldShowAudioOutput ? (
         <DeviceSelector
           title="Speaker"
           icon={<SpeakerIcon />}
